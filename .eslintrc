@@ -1,0 +1,17 @@
+{
+  "extends": "airbnb",
+  "rules": {
+    "consistent-return": "off",
+    "func-names": "off",
+    "max-len": [1, 160, 2, { "ignoreUrls": true }],
+    "no-alert": "off",
+    "no-console": "off",
+    "no-use-before-define": ["error", { "functions": false, "classes": true }],
+    "no-param-reassign": "off",
+    "prefer-const": "off",
+    "quotes": ["warn", "single"],
+    "react/sort-comp": "off",
+    "space-before-function-paren": ["error", {"anonymous": "never", "named": "never"}],
+    "vars-on-top": "off"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "sc-shuffler",
+  "version": "1.0.0",
+  "description": "A small client to play my SoundCloud liked tracks on shuffle.",
+  "main": "index.js",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "prop-types": "^15.5.10",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4"
+  },
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^4.0.0",
+    "eslint-plugin-react": "^6.9.0",
+    "webpack": "^2.5.1",
+    "webpack-dev-server": "^2.4.5"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jfanderson/SC-Shuffler.git"
+  },
+  "author": "John Anderson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jfanderson/SC-Shuffler/issues"
+  },
+  "homepage": "https://github.com/jfanderson/SC-Shuffler#readme"
+}
