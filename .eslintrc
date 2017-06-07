@@ -1,13 +1,24 @@
 {
   "extends": "airbnb",
+  "env": {
+    "browser": true
+  },
+  "globals": {
+    "SC": true
+  },
   "rules": {
+    "class-methods-use-this": "off",
     "consistent-return": "off",
     "func-names": "off",
+    "jsx-a11y/img-has-alt": "off",
+    "jsx-a11y/no-static-element-interactions": "off",
     "max-len": [1, 160, 2, { "ignoreUrls": true }],
     "no-alert": "off",
     "no-console": "off",
     "no-use-before-define": ["error", { "functions": false, "classes": true }],
     "no-param-reassign": "off",
+    "no-plusplus": "off",
+    "no-underscore-dangle": "off",
     "prefer-const": "off",
     "quotes": ["warn", "single"],
     "react/sort-comp": "off",

@@ -12,5 +12,14 @@ module.exports = {
       { test: /\.(js|jsx)$/, loader: 'babel-loader', exclude: /node_modules/ },
     ]
   },
-  devtool: "cheap-eval-source-map"
+  devtool: "cheap-eval-source-map",
+  devServer: {
+    port: 8080,
+    historyApiFallback: true,
+    setup: function(app) {
+      app.get('/callback', function(req, res) {
+        res.sendFile(__dirname + '/callback.html');
+      });
+    },
+  }
 };
