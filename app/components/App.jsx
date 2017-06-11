@@ -18,6 +18,7 @@ class App extends React.Component {
     this.state = {
       currentTrack: null,
       favorites: null,
+      history: [],
       loggedIn: false,
       player: null,
     };
@@ -107,15 +108,20 @@ class App extends React.Component {
   }
 
   _playNextTrack() {
-    let { favorites } = this.state;
-    let currentTrack = favorites.shift();
+    let { currentTrack, favorites, history } = this.state;
+    let nextTrack = favorites.shift();
+
+    if (currentTrack) {
+      history.push(currentTrack);
+    }
+
+    this._loadPlayer(nextTrack.uri);
 
     this.setState({
-      currentTrack,
+      currentTrack: nextTrack,
       favorites,
+      history,
     });
-
-    this._loadPlayer(currentTrack.uri);
   }
 }
 
