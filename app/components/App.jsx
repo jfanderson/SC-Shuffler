@@ -1,5 +1,6 @@
 import React from 'react';
 import 'whatwg-fetch';
+import Queue from './Queue.jsx';
 
 function shuffle(array) {
   for (let i = array.length; i; i--) {
@@ -8,7 +9,7 @@ function shuffle(array) {
   }
 }
 
-export default class App extends React.Component {
+class App extends React.Component {
   constructor() {
     super();
 
@@ -35,16 +36,23 @@ export default class App extends React.Component {
           />
         </div>
       );
+    } else if (!favorites) {
+      return (
+        <div>
+          <h1>SC Shuffler</h1>
+          <p>Loading your favorites songs...</p>
+        </div>
+      );
     }
 
     return (
       <div>
         <h1>SC Shuffler</h1>
-        {!favorites &&
-          <p>Loading your favorite songs...</p>
-        }
         {player && player.indexOf('soundcloud.com/player') !== -1 &&
-          <div dangerouslySetInnerHTML={{ __html: player }} />
+          <div>
+            <div dangerouslySetInnerHTML={{ __html: player }} />
+            <Queue songs={favorites} />
+          </div>
         }
       </div>
     );
@@ -110,3 +118,5 @@ export default class App extends React.Component {
     this._loadPlayer(currentTrack.uri);
   }
 }
+
+export default App;
