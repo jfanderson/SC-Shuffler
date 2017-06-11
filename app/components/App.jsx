@@ -14,6 +14,8 @@ class App extends React.Component {
     super();
 
     this._onLoginClick = this._onLoginClick.bind(this);
+    this._playNextTrack = this._playNextTrack.bind(this);
+    this._playPreviousTrack = this._playPreviousTrack.bind(this);
 
     this.state = {
       currentTrack: null,
@@ -52,6 +54,12 @@ class App extends React.Component {
         {player && player.indexOf('soundcloud.com/player') !== -1 &&
           <div>
             <div dangerouslySetInnerHTML={{ __html: player }} />
+            <button
+              onClick={this._playPreviousTrack}
+            >{'<<'}</button>
+            <button
+              onClick={this._playNextTrack}
+            >{'>>'}</button>
             <Queue songs={favorites} />
           </div>
         }
@@ -119,6 +127,24 @@ class App extends React.Component {
 
     this.setState({
       currentTrack: nextTrack,
+      favorites,
+      history,
+    });
+  }
+
+  _playPreviousTrack() {
+    let { currentTrack, favorites, history } = this.state;
+    let previousTrack = history.pop();
+
+    if (!previousTrack) {
+      return;
+    }
+
+    favorites.unshift(currentTrack);
+    this._loadPlayer(previousTrack.uri);
+
+    this.setState({
+      currentTrack: previousTrack,
       favorites,
       history,
     });
