@@ -81,22 +81,32 @@ export default class App extends React.Component {
           this._getNextBatch(favorites, results.next_href);
         } else {
           shuffle(favorites);
-          let currentTrack = favorites.shift();
-
-          this.setState({
-            currentTrack,
-            favorites,
-          });
-
-          this._loadPlayer(currentTrack.uri);
+          this.setState({ favorites }, this._playNextTrack);
         }
       });
   }
 
   _loadPlayer(trackUrl) {
-    SC.oEmbed(trackUrl)
+    SC.oEmbed(trackUrl, { auto_play: true })
       .then(oEmbed => {
-        this.setState({ player: oEmbed.html });
+        this.setState({ player: oEmbed.html }, this._onWidgetLoaded);
       });
+  }
+
+  _onWidgetLoaded() {
+    let widget = SC.Widget(document.querySelector('iframe'));
+    widget.bind(SC.Widget.Events.FINISH, this._playNextTrack.bind(this));
+  }
+
+  _playNextTrack() {
+    let { favorites } = this.state;
+    let currentTrack = favorites.shift();
+
+    this.setState({
+      currentTrack,
+      favorites,
+    });
+
+    this._loadPlayer(currentTrack.uri);
   }
 }
