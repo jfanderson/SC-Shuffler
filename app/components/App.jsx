@@ -15,13 +15,15 @@ export default class App extends React.Component {
     this._onLoginClick = this._onLoginClick.bind(this);
 
     this.state = {
+      currentTrack: null,
       favorites: null,
       loggedIn: false,
+      player: null,
     };
   }
 
   render() {
-    let { favorites, loggedIn } = this.state;
+    let { favorites, loggedIn, player } = this.state;
 
     if (!loggedIn) {
       return (
@@ -40,6 +42,9 @@ export default class App extends React.Component {
         <h1>SC Shuffler</h1>
         {!favorites &&
           <p>Loading your favorite songs...</p>
+        }
+        {player && player.indexOf('soundcloud.com/player') !== -1 &&
+          <div dangerouslySetInnerHTML={{ __html: player }} />
         }
       </div>
     );
@@ -76,8 +81,22 @@ export default class App extends React.Component {
           this._getNextBatch(favorites, results.next_href);
         } else {
           shuffle(favorites);
-          this.setState({ favorites });
+          let currentTrack = favorites.shift();
+
+          this.setState({
+            currentTrack,
+            favorites,
+          });
+
+          this._loadPlayer(currentTrack.uri);
         }
+      });
+  }
+
+  _loadPlayer(trackUrl) {
+    SC.oEmbed(trackUrl)
+      .then(oEmbed => {
+        this.setState({ player: oEmbed.html });
       });
   }
 }
