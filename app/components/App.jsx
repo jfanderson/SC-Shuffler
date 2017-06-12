@@ -13,6 +13,7 @@ class App extends React.Component {
   constructor() {
     super();
 
+    this._onKeyDown = this._onKeyDown.bind(this);
     this._onLoginClick = this._onLoginClick.bind(this);
     this._playNextTrack = this._playNextTrack.bind(this);
     this._playPreviousTrack = this._playPreviousTrack.bind(this);
@@ -34,6 +35,14 @@ class App extends React.Component {
       // HTML string for SoundCloud Widget player.
       player: null,
     };
+  }
+
+  componentWillMount() {
+    window.addEventListener('keydown', this._onKeyDown);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this._onKeyDown);
   }
 
   render() {
@@ -119,6 +128,27 @@ class App extends React.Component {
           queue,
         }, this._onWidgetLoaded);
       });
+  }
+
+  _onKeyDown(event) {
+    if (!this._widget) {
+      return;
+    }
+
+    switch (event.key) {
+      case ' ':
+        event.preventDefault();
+        this._widget.toggle();
+        break;
+      case 'ArrowRight':
+        this._playNextTrack();
+        break;
+      case 'ArrowLeft':
+        this._playPreviousTrack();
+        break;
+      default:
+        // do nothing
+    }
   }
 
   _onLoginClick() {
