@@ -16,6 +16,7 @@ class App extends React.Component {
     this._onLoginClick = this._onLoginClick.bind(this);
     this._playNextTrack = this._playNextTrack.bind(this);
     this._playPreviousTrack = this._playPreviousTrack.bind(this);
+    this._widget = null;
 
     this.state = {
       // Track currently being played.
@@ -98,15 +99,25 @@ class App extends React.Component {
           this._getNextFavoritesBatch(favorites, results.next_href);
         } else {
           shuffle(favorites);
-          this.setState({ queue: favorites }, this._playNextTrack);
+          this.setState({ queue: favorites }, this._loadPlayer);
         }
       });
   }
 
-  _loadPlayer(trackUrl) {
-    SC.oEmbed(trackUrl, { auto_play: true })
+  _loadPlayer() {
+    let { queue } = this.state;
+    let currentTrack = queue.shift();
+
+    SC.oEmbed(currentTrack.uri, {
+      auto_play: true,
+      maxheight: 166,
+    })
       .then(oEmbed => {
-        this.setState({ player: oEmbed.html }, this._onWidgetLoaded);
+        this.setState({
+          currentTrack,
+          player: oEmbed.html,
+          queue,
+        }, this._onWidgetLoaded);
       });
   }
 
@@ -123,19 +134,16 @@ class App extends React.Component {
 
   // Add event listener for when track has finished playing.
   _onWidgetLoaded() {
-    let widget = SC.Widget(document.querySelector('iframe'));
-    widget.bind(SC.Widget.Events.FINISH, this._playNextTrack.bind(this));
+    this._widget = SC.Widget(document.querySelector('iframe'));
+    this._widget.bind(SC.Widget.Events.FINISH, this._playNextTrack.bind(this));
   }
 
   _playNextTrack() {
     let { currentTrack, history, queue } = this.state;
     let nextTrack = queue.shift();
 
-    if (currentTrack) {
-      history.push(currentTrack);
-    }
-
-    this._loadPlayer(nextTrack.uri);
+    history.push(currentTrack);
+    this._widget.load(nextTrack.uri, { auto_play: true });
 
     this.setState({
       currentTrack: nextTrack,
@@ -153,7 +161,7 @@ class App extends React.Component {
     }
 
     queue.unshift(currentTrack);
-    this._loadPlayer(previousTrack.uri);
+    this._widget.load(previousTrack.uri, { auto_play: true });
 
     this.setState({
       currentTrack: previousTrack,
