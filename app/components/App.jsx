@@ -18,16 +18,25 @@ class App extends React.Component {
     this._playPreviousTrack = this._playPreviousTrack.bind(this);
 
     this.state = {
+      // Track currently being played.
       currentTrack: null,
-      favorites: null,
+
+      // Array of songs queued up to play next.
+      queue: null,
+
+      // Array of previously played songs.
       history: [],
+
+      // Is the user logged in?
       loggedIn: false,
+
+      // HTML string for SoundCloud Widget player.
       player: null,
     };
   }
 
   render() {
-    let { favorites, loggedIn, player } = this.state;
+    let { loggedIn, player, queue } = this.state;
 
     if (!loggedIn) {
       return (
@@ -39,11 +48,11 @@ class App extends React.Component {
           />
         </div>
       );
-    } else if (!favorites) {
+    } else if (!queue) {
       return (
         <div>
           <h1>SC Shuffler</h1>
-          <p>Loading your favorites songs...</p>
+          <p>Loading your favorite songs...</p>
         </div>
       );
     }
@@ -60,11 +69,45 @@ class App extends React.Component {
             <button
               onClick={this._playNextTrack}
             >{'>>'}</button>
-            <Queue songs={favorites} />
+            <Queue songs={queue} />
           </div>
         }
       </div>
     );
+  }
+
+  _getFavorites() {
+    SC.get('/me/favorites', {
+      limit: 200,
+      linked_partitioning: 1,
+    })
+      .then((results) => {
+        this._getNextFavoritesBatch(results.collection, results.next_href);
+      });
+  }
+
+  // Recursively fetch paginated favorites b/c SoundCloud won't return all at once.
+  _getNextFavoritesBatch(favorites, nextUri) {
+    fetch(nextUri)
+      .then(results => (results.json()))
+      .then(results => {
+        favorites = favorites.concat(results.collection);
+
+        // If there is not a next_href prop, then all tracks have been fetched.
+        if (results.next_href) {
+          this._getNextFavoritesBatch(favorites, results.next_href);
+        } else {
+          shuffle(favorites);
+          this.setState({ queue: favorites }, this._playNextTrack);
+        }
+      });
+  }
+
+  _loadPlayer(trackUrl) {
+    SC.oEmbed(trackUrl, { auto_play: true })
+      .then(oEmbed => {
+        this.setState({ player: oEmbed.html }, this._onWidgetLoaded);
+      });
   }
 
   _onLoginClick() {
@@ -78,46 +121,15 @@ class App extends React.Component {
       });
   }
 
-  _getFavorites() {
-    SC.get('/me/favorites', {
-      limit: 200,
-      linked_partitioning: 1,
-    })
-      .then((results) => {
-        this._getNextBatch(results.collection, results.next_href);
-      });
-  }
-
-  _getNextBatch(favorites, nextUri) {
-    fetch(nextUri)
-      .then(results => (results.json()))
-      .then(results => {
-        favorites = favorites.concat(results.collection);
-
-        if (results.next_href) {
-          this._getNextBatch(favorites, results.next_href);
-        } else {
-          shuffle(favorites);
-          this.setState({ favorites }, this._playNextTrack);
-        }
-      });
-  }
-
-  _loadPlayer(trackUrl) {
-    SC.oEmbed(trackUrl, { auto_play: true })
-      .then(oEmbed => {
-        this.setState({ player: oEmbed.html }, this._onWidgetLoaded);
-      });
-  }
-
+  // Add event listener for when track has finished playing.
   _onWidgetLoaded() {
     let widget = SC.Widget(document.querySelector('iframe'));
     widget.bind(SC.Widget.Events.FINISH, this._playNextTrack.bind(this));
   }
 
   _playNextTrack() {
-    let { currentTrack, favorites, history } = this.state;
-    let nextTrack = favorites.shift();
+    let { currentTrack, history, queue } = this.state;
+    let nextTrack = queue.shift();
 
     if (currentTrack) {
       history.push(currentTrack);
@@ -127,25 +139,25 @@ class App extends React.Component {
 
     this.setState({
       currentTrack: nextTrack,
-      favorites,
+      queue,
       history,
     });
   }
 
   _playPreviousTrack() {
-    let { currentTrack, favorites, history } = this.state;
+    let { currentTrack, history, queue } = this.state;
     let previousTrack = history.pop();
 
     if (!previousTrack) {
       return;
     }
 
-    favorites.unshift(currentTrack);
+    queue.unshift(currentTrack);
     this._loadPlayer(previousTrack.uri);
 
     this.setState({
       currentTrack: previousTrack,
-      favorites,
+      queue,
       history,
     });
   }
